@@ -14,8 +14,10 @@ namespace Imagine.WebAR
     [RequireComponent(typeof(Camera))]
     public class ARCamera : MonoBehaviour
     {
+#if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")] private static extern void SetWebGLARCameraSettings(string settings);
         [DllImport("__Internal")] private static extern void WebGLStartCamera();
+        [DllImport("__Internal")] private static extern void WebGLStopCamera();
         [DllImport("__Internal")] private static extern bool WebGLIsCameraStarted();
         [DllImport("__Internal")] private static extern void WebGLUnpauseCamera();
         [DllImport("__Internal")] private static extern void WebGLPauseCamera();
@@ -25,6 +27,7 @@ namespace Imagine.WebAR
         [DllImport("__Internal")] private static extern bool IsWebcamPermissionGranted();
         [DllImport("__Internal")] private static extern void WebGLFlipCamera();
         [DllImport("__Internal")] private static extern bool WebGLIsCameraFlipped();
+#endif
 
          public enum VideoPlaneMode {
             NONE,
@@ -132,6 +135,12 @@ namespace Imagine.WebAR
                 WebGLStartCamera();
             }
 #endif  
+        }
+
+        void StopCamera(){
+#if UNITY_WEBGL && !UNITY_EDITOR
+            WebGLStopCamera();
+#endif
         }
 
         void OnStartWebcamSuccess(){
@@ -252,7 +261,9 @@ namespace Imagine.WebAR
         }
 
         void SetVideoDims(){
+#if UNITY_WEBGL && !UNITY_EDITOR
             Resize( WebGLGetVideoDims());
+#endif
         }
 
         // public void DebugDrawDataUrl(string dataUrl, int width, int height){

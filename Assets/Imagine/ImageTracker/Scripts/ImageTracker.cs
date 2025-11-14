@@ -2,11 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-#if IMAGINE_URP
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
-#endif
+// #if IMAGINE_URP
+// using UnityEngine.Rendering;
+// using UnityEngine.Rendering.Universal;
+// #endif
 using System.Runtime.InteropServices;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 
 namespace Imagine.WebAR
@@ -22,13 +25,14 @@ namespace Imagine.WebAR
 
     public class ImageTracker : MonoBehaviour
     {
+#if !UNITY_EDITOR && UNITY_WEBGL
         [DllImport("__Internal")] private static extern void StartWebGLiTracker(string ids, string name);
         [DllImport("__Internal")] private static extern void StopWebGLiTracker();
         [DllImport("__Internal")] private static extern float SetWebGLiTrackerSettings(string settings);
         [DllImport("__Internal")] private static extern bool IsWebGLiTrackerReady();
         [DllImport("__Internal")] private static extern float DebugImageTarget(string id);
         [DllImport("__Internal")] private static extern bool IsWebGLImageTracked(string id);
-        
+#endif
 
         [SerializeField] private ARCamera trackerCam;
         [SerializeField] private List<ImageTarget> imageTargets;
@@ -164,7 +168,11 @@ namespace Imagine.WebAR
 
         public bool IsImageTracked(string id)
         {
-            return IsWebGLImageTracked(id);
+            bool b = false;
+#if UNITY_WEBGL && !UNITY_EDITOR
+            b =  IsWebGLImageTracked(id);
+#endif
+            return b;
         }
 
         void OnTrackingFound(string id)
@@ -312,16 +320,24 @@ namespace Imagine.WebAR
 
             if (trackerSettings.debugMode)
             {
+#if ENABLE_INPUT_SYSTEM  
+                if(Keyboard.current != null && Keyboard.current.iKey.wasPressedThisFrame)
+#else
                 if (Input.GetKeyDown(KeyCode.I))
+#endif
                 {
                     if(debugImageTargetIndex >= imageTargets.Count)
                     {
                         debugImageTargetIndex = 0;
+#if UNITY_WEBGL && !UNITY_EDITOR
                         DebugImageTarget("");
+#endif
                     }
                     else
                     {
+#if UNITY_WEBGL && !UNITY_EDITOR
                         DebugImageTarget(imageTargets[debugImageTargetIndex].id);
+#endif
                         debugImageTargetIndex++;
                     }
                 }
@@ -333,12 +349,21 @@ namespace Imagine.WebAR
 
         private void Update_Debug()
         {
+#if ENABLE_INPUT_SYSTEM  
+            var x_left    = Keyboard.current != null && Keyboard.current.aKey.isPressed;
+            var x_right   = Keyboard.current != null && Keyboard.current.dKey.isPressed;
+            var z_forward = Keyboard.current != null && Keyboard.current.wKey.isPressed;
+            var z_back    = Keyboard.current != null && Keyboard.current.sKey.isPressed;
+            var y_up      = Keyboard.current != null && Keyboard.current.rKey.isPressed;
+            var y_down    = Keyboard.current != null && Keyboard.current.fKey.isPressed;
+#else
             var x_left = Input.GetKey(KeyCode.A);
             var x_right = Input.GetKey(KeyCode.D);
             var z_forward = Input.GetKey(KeyCode.W); ;
             var z_back = Input.GetKey(KeyCode.S); ;
             var y_up = Input.GetKey(KeyCode.R);
             var y_down = Input.GetKey(KeyCode.F);
+#endif
 
             float speed = debugCamMoveSensitivity * Time.deltaTime;
             float dx = (x_right ? speed : 0) + (x_left ? -speed : 0);
@@ -346,13 +371,21 @@ namespace Imagine.WebAR
             //float dsca = 1 + (z_forward ? speed : 0) + (z_back ? -speed : 0);
             float dz = (z_forward ? speed : 0) + (z_back ? -speed : 0);
 
-
+#if ENABLE_INPUT_SYSTEM  
+            var y_rot_left  = Keyboard.current != null && Keyboard.current.leftArrowKey.isPressed;
+            var y_rot_right = Keyboard.current != null && Keyboard.current.rightArrowKey.isPressed;
+            var x_rot_up    = Keyboard.current != null && Keyboard.current.upArrowKey.isPressed;
+            var x_rot_down  = Keyboard.current != null && Keyboard.current.downArrowKey.isPressed;
+            var z_rot_cw    = Keyboard.current != null && Keyboard.current.commaKey.isPressed;
+            var z_rot_ccw   = Keyboard.current != null && Keyboard.current.periodKey.isPressed;
+#else
             var y_rot_left = Input.GetKey(KeyCode.LeftArrow);
             var y_rot_right = Input.GetKey(KeyCode.RightArrow);
             var x_rot_up = Input.GetKey(KeyCode.UpArrow);
             var x_rot_down = Input.GetKey(KeyCode.DownArrow);
             var z_rot_cw = Input.GetKey(KeyCode.Comma);
             var z_rot_ccw = Input.GetKey(KeyCode.Period);
+#endif
 
             var angularSpeed = debugCamTiltSensitivity * Time.deltaTime; //degrees per frame
             var d_rotx = (x_rot_up ? angularSpeed : 0) + (x_rot_down ? -angularSpeed : 0);

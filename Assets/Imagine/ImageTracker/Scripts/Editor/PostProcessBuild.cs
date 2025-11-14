@@ -10,6 +10,7 @@ namespace Imagine.WebAR.Editor
 {
     public class PostProcessBuild : MonoBehaviour
     {
+#if UNITY_WEBGL
         [PostProcessBuild]
         public static void OnPostProcessBuild(BuildTarget target, string buildPath)
         {
@@ -49,6 +50,7 @@ namespace Imagine.WebAR.Editor
             html = html.Replace("<!--IMAGETARGETS-->", "<!--IMAGETARGETS-->\n" + targetsHtml);
             File.WriteAllText(buildPath + "/index.html", html);
         }
+#endif
     }
 }
 

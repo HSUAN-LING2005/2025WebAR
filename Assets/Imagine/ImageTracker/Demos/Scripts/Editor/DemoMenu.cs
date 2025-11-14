@@ -6,7 +6,7 @@ using UnityEditor;
 
 namespace Imagine.WebAR.Demo.Editor
 {
-    public class DemoMenu
+    public class ImageTrackerDemoMenu
     {
 		[MenuItem("Assets/Imagine WebAR/Add Demo Imagetargets", false, 1301)]
 		public static void AddDemoImageTargets()

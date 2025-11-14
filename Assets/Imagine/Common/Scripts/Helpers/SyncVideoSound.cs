@@ -23,6 +23,7 @@ namespace Imagine.WebAR.Samples
             StopCoroutine("SyncRoutine");
         }
         
+        
         IEnumerator SyncRoutine()
         {
             var videoRenderer = video.GetComponent<Renderer>();
@@ -35,20 +36,22 @@ namespace Imagine.WebAR.Samples
 
             video.Play();
             sound.Play();
+            sound.mute = true;
 
             video.time = lastPos;
-            //sound.time = lastPos;
+            sound.time = lastPos;
+
+            float lastUnsyncTime = 0.5f;
 
             while(true){
                 if(video.time > 0.01f)
                 {
                     videoRenderer.enabled = true;
                 }
-                else if(!sound.isPlaying){
-                    sound.time = (float)video.time;
-                    sound.Play();
-
-                }
+                // else if(!sound.isPlaying){
+                //     sound.time = (float)video.time;
+                //     sound.Play();
+                // }
                     
 
                 if(Mathf.Abs(sound.time - (float)video.time) > 0.1){
@@ -56,6 +59,22 @@ namespace Imagine.WebAR.Samples
                     
                     sound.time = (float)video.time;
                     Debug.Log(sound.time + "=>" + video.time);
+                    Debug.Log("unsync - mute audio");
+
+                    // sound.Stop();
+                    sound.mute = true;
+                    lastUnsyncTime = Time.time;
+                }
+                else{
+                    // sound.Play();
+                    if(Time.time - lastUnsyncTime > 0.5){
+                        sound.mute = false;
+                        Debug.Log("sync - unmute audio");
+                    }
+                    else{
+                        Debug.Log("Waiting to sync...  " + (Time.time - lastUnsyncTime) + "s");
+                    }
+
                 }
                
 

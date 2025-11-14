@@ -7,6 +7,10 @@ mergeInto(LibraryManager.library, {
     {
         window.StartWebcam();
     },
+    WebGLStopCamera: function()
+	{
+    	window.StopWebcam();
+    },
     WebGLIsCameraStarted: function()
     {
         if(!window.arCamera){
@@ -38,7 +42,7 @@ mergeInto(LibraryManager.library, {
     {
         var data = window.arCamera.getVideoDims();
         var bufferSize = lengthBytesUTF8(data) + 1;
-        var buffer =  unityInstance.Module._malloc(bufferSize);
+        var buffer = _malloc(bufferSize);
         stringToUTF8(data, buffer, bufferSize);
         return buffer;
     },
